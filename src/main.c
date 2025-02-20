@@ -21,7 +21,6 @@ int main (void) {
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -29,7 +28,11 @@ int main (void) {
         return -2;
     }
 
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
+
+    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
     GLuint vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
