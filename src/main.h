@@ -22,5 +22,12 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);"
     "}\0";
 
+const char *yellowFragShaderSource = "#version 330 core\n"
+    "out vec4 FragColor;\n\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = vec4(0.998f, 0.792f, 0.0f, 1.0f);"
+    "}\0";
+
 void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
