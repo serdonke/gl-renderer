@@ -102,6 +102,12 @@ int main (void) {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteShader(fragmentShader2);
+    
+//    float timeValue = glfwGetTime();
+//    float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+//    GLint vertexColorLocation = glGetUniformLocation(shaderProgram1, "ourColor");
+//    glUseProgram(shaderProgram1);
+//    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
     float triangle[] = {
          0.5f,  0.5f, 0.0f,  // top right
@@ -119,9 +125,10 @@ int main (void) {
          0.0f, 0.0f, 0.0f,
     };
     float triangle2[] = {
-         0.0f, 0.0f, 0.0f,
-        -0.5f, -0.75f, 0.0f,
-         0.5f, -0.75f, 0.0f
+        // positions         // colors
+        -0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+        0.0f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
     };
 
     GLuint VBOs[2], VAOs[2]; //, EBO;
@@ -147,10 +154,12 @@ int main (void) {
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-
+    glBindVertexArray(0);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
@@ -161,10 +170,11 @@ int main (void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAOs[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glUseProgram(shaderProgram);
+        //glBindVertexArray(VAOs[0]);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
         glUseProgram(shaderProgram1);
+
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
