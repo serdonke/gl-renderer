@@ -30,6 +30,7 @@ int main (void) {
 
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    printf("%d %d", fbWidth, fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
 
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
