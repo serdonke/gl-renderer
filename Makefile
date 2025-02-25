@@ -27,11 +27,11 @@ main: $(OBJ) $(GLFW_BUILD)/src/libglfw3.a
 
 -include $(DEP)
 
-%.o: %.c
+%.o: %.c $(GLFW_BUILD)/src/libglfw3.a
 	$(CC) $(CFLAGS) -Iinclude -I$(GLFW_DIR)/include -c $< -o $@
 
 run: main
-	./build/main
+	cd src && ../build/main
 
 clean:
 	rm -f $(OBJ) $(DEP) main
