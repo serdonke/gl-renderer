@@ -102,14 +102,14 @@ static inline void printProgramLog(GLuint program)
         {
             GLsizei len;
             glGetProgramInfoLog(program, logLen, &len, log);
-            LOG_ERROR("LINK::PROGRAM error %s", log);
+            LOG_ERROR("LINK::PROGRAM error\n%s", log);
             free(log);
         }
         else
         {
             LOG_ERROR("Could not allocate memory for logging in program\n");
-            return;
         }
+        return;
     }
 
     LOG_INFO("Linking programs successful\n");
