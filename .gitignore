@@ -1,4 +1,3 @@
 build/
-external/
 *.o
 *.d

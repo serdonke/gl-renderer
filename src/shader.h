@@ -5,14 +5,43 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "logger.h"
 
-static inline char* readShader(const char* path)
+#define MAX_PATH_LEN 1024
+
+void getExecutablePath(char *buffer, size_t size)
 {
-    FILE* file = fopen(path, "r");
+    ssize_t len = readlink("/proc/self/exe", buffer, size - 1);
+    if (len != -1) {
+        buffer[len] = '\0';
+        char *lastSlash = strrchr(buffer, '/');
+        if (lastSlash) *(lastSlash + 1) = '\0';  // Keep only the directory part
+    } else {
+        perror("readlink");
+        exit(EXIT_FAILURE);
+    }
+}
+
+char *constructShaderPath(const char *shader)
+{
+    static char path[MAX_PATH_LEN];
+    getExecutablePath(path, sizeof(path));
+    strncat(path, shader, sizeof(path) - strlen(path) - 1);
+    return path;
+}
+
+static inline char *readShader(const char *relativePath)
+{
+    char *path = constructShaderPath(relativePath);
+    
+    LOG_INFO("Reading Shader at %s\n", path);
+
+    FILE *file = fopen(path, "r");
     if (!file) {
-        LOG_ERROR("Failed to open  shader file: %s\n", path);
+        LOG_ERROR("Failed to open shader file: %s\n", path);
         return NULL;
     }
 
@@ -20,7 +49,7 @@ static inline char* readShader(const char* path)
     size_t size = ftell(file);
     rewind(file);
 
-    char* buffer = (char*)malloc(size + 1);
+    char *buffer = (char *)malloc(size + 1);
     if (!buffer) {
         LOG_ERROR("Failed to allocate memory for shader: %s\n", path);
         fclose(file);
@@ -52,7 +81,7 @@ static inline void printShaderCompileLog(GLuint shader)
     {
         if(logLen < 1)
         {
-            LOG_ERROR("%s::SHADER There were errors but there were no logs\n", shaderType);
+            LOG_ERROR("%s::SHADER There were errors but there were no logs\n", typeStr);
             return;
         }
 
