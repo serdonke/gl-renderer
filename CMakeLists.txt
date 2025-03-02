@@ -15,25 +15,17 @@ add_subdirectory(${EXTERNAL_DIR}/glfw-3.4)
 add_library(glad STATIC ${EXTERNAL_DIR}/glad/src/glad.c)
 target_include_directories(glad PUBLIC ${EXTERNAL_DIR}/glad/include)
 
-file(GLOB SHADERS "src/shaders/*")
-add_custom_target(
-    shaders_target ALL
-    DEPENDS ${SHADERS}
-)
+add_library(compile_flags INTERFACE)
+target_compile_options(compile_flags INTERFACE -Wall -Wextra -Wpedantic)
 
 add_executable(main src/main.c src/logger.h src/main.h src/shader.h)
-target_link_libraries(main PRIVATE glfw glad)
+target_link_libraries(main PRIVATE glfw glad compile_flags)
 
-add_dependencies(main shaders_target)
+add_executable(triangle src/triangle.c src/logger.h src/shader.h)
+target_link_libraries(triangle PRIVATE glfw glad compile_flags)
 
-add_custom_command(
-    TARGET main POST_BUILD
+add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/src/shaders $<TARGET_FILE_DIR:main>/shaders
+    ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/shaders
 )
 
-target_compile_options(main PRIVATE 
-    -Wall
-    -Wextra
-    -Wpedantic
-)
