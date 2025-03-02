@@ -7,7 +7,7 @@ cmake -B build
 cmake --build build --parallel
 if [ $? -eq 0 ]; then
     if [ -n "$1" ] && [ -x "build/$1" ]; then
-        ./build/$1
+        cd build && ./$1
     else
         printf "\n\nTo run examples: ./build.sh [NAME]\n"
         echo "Available options:"
