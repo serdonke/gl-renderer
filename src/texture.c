@@ -91,9 +91,9 @@ int main(void)
     glGenTextures(1, &gato);
     glBindTexture(GL_TEXTURE_2D, gato);
 
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(1);
     int width, height, nrChannels;
-    unsigned char* image = stbi_load("textures/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char* image = stbi_load("textures/gato.jpeg", &width, &height, &nrChannels, 0);
     LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
