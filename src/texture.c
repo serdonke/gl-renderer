@@ -29,7 +29,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "trongle-boi", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "texture-boi", NULL, NULL);
 
     if (window == NULL)
     {
@@ -93,7 +93,11 @@ int main(void)
 
     stbi_set_flip_vertically_on_load(1);
     int width, height, nrChannels;
-    unsigned char* image = stbi_load("textures/gato.jpeg", &width, &height, &nrChannels, 0);
+    unsigned char* image = stbi_load("textures/boi.jpg", &width, &height, &nrChannels, 0);
+    if(!image)
+    {
+        LOG_ERROR("FAILED to load image");
+    }
     LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -101,15 +105,10 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    if(image)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        LOG_ERROR("Failed to load texture");
-    }
+    // Thanks for the fisting session opengl
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(image);
 
