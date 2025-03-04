@@ -87,9 +87,6 @@ int main(void)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    GLuint gato;
-    glGenTextures(1, &gato);
-    glBindTexture(GL_TEXTURE_2D, gato);
 
     stbi_set_flip_vertically_on_load(1);
     int width, height, nrChannels;
@@ -97,9 +94,13 @@ int main(void)
     if(!image)
     {
         LOG_ERROR("FAILED to load image");
+        exit(69);
     }
     LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
 
+    GLuint gato;
+    glGenTextures(1, &gato);
+    glBindTexture(GL_TEXTURE_2D, gato);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -112,14 +113,38 @@ int main(void)
 
     stbi_image_free(image);
 
+    unsigned char* image2 = stbi_load("textures/gato.png", &width, &height, &nrChannels, 4);
+    if(!image2)
+    {
+        LOG_ERROR("FAILED to load image");
+        exit(69);
+    }
+    LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
+
+    GLuint gato2;
+    glGenTextures(1, &gato2);
+    glBindTexture(GL_TEXTURE_2D, gato2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image2);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image2);
+
     glBindVertexArray(0);
+
+    glUseProgram(trongleProgram);
+    glUniform1i(glGetUniformLocation(trongleProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(trongleProgram, "texture2"), 1);
+
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gato);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gato2);
 
         glUseProgram(trongleProgram);
         glBindVertexArray(VAO);
