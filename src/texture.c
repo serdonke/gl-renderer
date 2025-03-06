@@ -12,6 +12,20 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 640
 
+float mixvalue = 0.5f;
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if(yoffset < 0 && mixvalue > 0.0)
+    {
+        mixvalue -= 0.09f;
+        return;
+    } else if (mixvalue < 1.0)
+    {    
+        mixvalue += 0.09f;
+    }
+    return;
+}
+
 int main(void)
 {
     glfwSetErrorCallback(logGLFWerror);
@@ -56,9 +70,9 @@ int main(void)
     GLuint trongleProgram = compileAndLinkShader("shaders/texture.vs", "shaders/texture.fs");
 
     float quad[] = {
-        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 2.0f,
-         0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 2.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 2.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
         -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     };
 
@@ -140,6 +154,7 @@ int main(void)
     glUniform1i(glGetUniformLocation(trongleProgram, "texture1"), 0);
     glUniform1i(glGetUniformLocation(trongleProgram, "texture2"), 1);
 
+    glfwSetScrollCallback(window, scrollCallback);
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -151,6 +166,7 @@ int main(void)
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, gato2);
 
+        glUniform1f(glGetUniformLocation(trongleProgram, "mixvalue"), mixvalue);
         glUseProgram(trongleProgram);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -168,3 +184,4 @@ int main(void)
     glfwTerminate();
     return 0;
 }
+
