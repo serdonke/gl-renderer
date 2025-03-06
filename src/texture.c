@@ -56,9 +56,9 @@ int main(void)
     GLuint trongleProgram = compileAndLinkShader("shaders/texture.vs", "shaders/texture.fs");
 
     float quad[] = {
-        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 2.0f,
+         0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 2.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 2.0f, 0.0f,
         -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     };
 
@@ -98,16 +98,17 @@ int main(void)
     }
     LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
 
+    // Thanks for the fisting session opengl
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     GLuint gato;
     glGenTextures(1, &gato);
     glBindTexture(GL_TEXTURE_2D, gato);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Thanks for the fisting session opengl
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -124,6 +125,10 @@ int main(void)
     GLuint gato2;
     glGenTextures(1, &gato2);
     glBindTexture(GL_TEXTURE_2D, gato2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image2);
     glGenerateMipmap(GL_TEXTURE_2D);
 
