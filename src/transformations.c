@@ -14,6 +14,20 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 640
 
+float mixvalue = 0.5f;
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if(yoffset < 0 && mixvalue > 0.0)
+    {
+        mixvalue -= 0.09f;
+        return;
+    } else if (mixvalue < 1.0)
+    {    
+        mixvalue += 0.09f;
+    }
+    return;
+}
+
 int main(void)
 {
     glfwSetErrorCallback(logGLFWerror);
@@ -31,7 +45,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "trans-boi", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "texture-boi", NULL, NULL);
 
     if (window == NULL)
     {
@@ -55,14 +69,127 @@ int main(void)
 
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
+    GLuint trongleProgram = compileAndLinkShader("shaders/transformations.vs", "shaders/transformations.fs");
+
+    float quad[] = {
+        -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    };
+
+    GLint indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    GLuint VAO, VBO, EBO;
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+
+    stbi_set_flip_vertically_on_load(1);
+    int width, height, nrChannels;
+    unsigned char* image = stbi_load("textures/boi.jpg", &width, &height, &nrChannels, 0);
+    if(!image)
+    {
+        LOG_ERROR("FAILED to load image");
+        exit(69);
+    }
+    LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
+
+    // Thanks for the fisting session opengl
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    GLuint gato;
+    glGenTextures(1, &gato);
+    glBindTexture(GL_TEXTURE_2D, gato);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image);
+
+    unsigned char* image2 = stbi_load("textures/gato.png", &width, &height, &nrChannels, 4);
+    if(!image2)
+    {
+        LOG_ERROR("FAILED to load image");
+        exit(69);
+    }
+    LOG_INFO("Loaded texture with %d x %d with %d channels", width, height, nrChannels);
+
+    GLuint gato2;
+    glGenTextures(1, &gato2);
+    glBindTexture(GL_TEXTURE_2D, gato2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image2);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image2);
+
+    glBindVertexArray(0);
+
+    glUseProgram(trongleProgram);
+    glUniform1i(glGetUniformLocation(trongleProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(trongleProgram, "texture2"), 1);
+
+
+    glfwSetScrollCallback(window, scrollCallback);
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        mat4 trans = GLM_MAT4_IDENTITY_INIT;
+        glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
+        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+        glUniformMatrix4fv(glGetUniformLocation(trongleProgram, "transform"), 1, GL_FALSE, trans[0]);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gato);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gato2);
+
+        glUniform1f(glGetUniformLocation(trongleProgram, "mixvalue"), mixvalue);
+        glUseProgram(trongleProgram);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteTextures(1, &gato);
+    glDeleteProgram(trongleProgram);
+
     glfwTerminate();
     return 0;
 }
+
