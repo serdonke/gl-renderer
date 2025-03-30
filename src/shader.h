@@ -6,23 +6,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "logger.h"
+
+#ifdef _WIN32
+    #include <windows.h>
+    #define PATH_SEPARATOR '\\'
+#else
+    #include <unistd.h>
+    #define PATH_SEPARATOR '/'
+#endif
 
 #define MAX_PATH_LEN 1024
 
 void getExecutablePath(char *buffer, size_t size)
 {
+#ifdef _WIN32
+    if (GetModuleFileNameA(NULL, buffer, (DWORD)size) == 0) {
+        perror("GetModuleFileNameA");
+        exit(EXIT_FAILURE);
+    }
+    char *lastSlash = strrchr(buffer, PATH_SEPARATOR);
+    if (lastSlash) *(lastSlash + 1) = '\0';  // Keep only the directory part
+#else
     ssize_t len = readlink("/proc/self/exe", buffer, size - 1);
     if (len != -1) {
         buffer[len] = '\0';
-        char *lastSlash = strrchr(buffer, '/');
+        char *lastSlash = strrchr(buffer, PATH_SEPARATOR);
         if (lastSlash) *(lastSlash + 1) = '\0';  // Keep only the directory part
     } else {
         perror("readlink");
         exit(EXIT_FAILURE);
     }
+#endif
 }
 
 char *constructShaderPath(const char *shader)
@@ -36,7 +52,7 @@ char *constructShaderPath(const char *shader)
 static inline char *readShader(const char *relativePath)
 {
     char *path = constructShaderPath(relativePath);
-    
+
     LOG_INFO("Reading Shader at %s\n", path);
 
     FILE *file = fopen(path, "r");
