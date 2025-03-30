@@ -1,8 +1,5 @@
 #!/bin/bash
 set -e
-if [ ! -d "build" ]; then
-    mkdir build
-fi
 cmake -B build
 cmake --build build --parallel
 if [ $? -eq 0 ]; then
