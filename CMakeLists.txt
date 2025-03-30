@@ -14,6 +14,11 @@ add_subdirectory(${EXTERNAL_DIR}/glfw-3.4)
 add_library(glad STATIC ${EXTERNAL_DIR}/glad/src/glad.c)
 target_include_directories(glad PUBLIC ${EXTERNAL_DIR}/glad/include)
 
+option(CGLM_SHARED "Shared build" OFF)
+option(CGLM_STATIC "Static build" ON)
+option(CGLM_USE_C99 "" OFF) # C11 
+option(CGLM_USE_TEST "Enable Tests" OFF) # for make check - make test
+add_subdirectory(external/cglm/ EXCLUDE_FROM_ALL)
 # Global compiler flags
 add_library(compile_flags INTERFACE)
 target_compile_options(compile_flags INTERFACE -Wall -Wextra -Wpedantic)
@@ -25,7 +30,7 @@ file(GLOB EXE_SOURCES src/*.c)
 foreach(SOURCE_FILE ${EXE_SOURCES})
     get_filename_component(EXE_NAME ${SOURCE_FILE} NAME_WE)  # Get file name without extension
     add_executable(${EXE_NAME} ${SOURCE_FILE} src/logger.h src/shader.h src/utils.h)
-    target_link_libraries(${EXE_NAME} PRIVATE glfw glad compile_flags)
+    target_link_libraries(${EXE_NAME} PRIVATE glfw glad cglm compile_flags)
     target_include_directories(${EXE_NAME} PRIVATE ${EXTERNAL_DIR}/stb)
     add_dependencies(${EXE_NAME} copy_shaders copy_textures)  # <- Added dependency
 endforeach()
