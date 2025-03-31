@@ -21,7 +21,7 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     {
         mixvalue -= 0.09f;
         return;
-    } else if (mixvalue < 1.0)
+    } else if (yoffset > 0 && mixvalue < 1.0)
     {    
         mixvalue += 0.09f;
     }
@@ -165,7 +165,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
         
         mat4 trans = GLM_MAT4_IDENTITY_INIT;
-        glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
+        glm_translate(trans, (vec3){0.5f, -0.5f, 0.5f});
         glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
         glUniformMatrix4fv(glGetUniformLocation(trongleProgram, "transform"), 1, GL_FALSE, trans[0]);
 
@@ -177,6 +177,13 @@ int main(void)
         glUniform1f(glGetUniformLocation(trongleProgram, "mixvalue"), mixvalue);
         glUseProgram(trongleProgram);
         glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glm_mat4_identity(trans);
+        glm_translate(trans, (vec3){-0.5f, 0.5f, 0.5f});
+        float scale = sin(glfwGetTime());
+        glm_scale(trans, (vec3){scale, scale, scale});
+        glUniformMatrix4fv(glGetUniformLocation(trongleProgram, "transform"), 1, GL_FALSE, trans[0]);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
