@@ -198,7 +198,7 @@ int main(void)
     mat4 view = GLM_MAT4_IDENTITY_INIT;
     glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
     mat4 projection;
-    glm_perspective(glm_rad(45.0f),(float)WINDOW_WIDTH/(float)WINDOW_HEIGHT,0.1f,100.0f,projection);
+    glm_perspective(glm_rad(55.0f),(float)WINDOW_WIDTH/(float)WINDOW_HEIGHT,0.1f,100.0f,projection);
 
     GLint modelLoc = glGetUniformLocation(trongleProgram, "model");
     GLint viewLoc = glGetUniformLocation(trongleProgram, "view");
@@ -207,7 +207,20 @@ int main(void)
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view[0]);
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection[0]);
-
+    
+    vec3 cubePositions[] = {
+        { 0.0f,  0.0f,  0.0f}, 
+        { 2.0f,  5.0f, -15.0f}, 
+        {-1.5f, -2.2f, -2.5f},  
+        {-3.8f, -2.0f, -12.3f},  
+        { 2.4f, -0.4f, -3.5f},  
+        {-1.7f,  3.0f, -7.5f},  
+        { 1.3f, -2.0f, -2.5f},  
+        { 1.5f,  2.0f, -2.5f}, 
+        { 1.5f,  0.2f, -1.5f}, 
+        {-1.3f,  1.0f, -1.5f} 
+    }; 
+     
     glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window))
     {
@@ -215,9 +228,6 @@ int main(void)
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        glm_mat4_identity(model);
-        glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gato);
@@ -227,7 +237,21 @@ int main(void)
         glUniform1f(glGetUniformLocation(trongleProgram, "mixvalue"), mixvalue);
         glUseProgram(trongleProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for(size_t i = 0;i<10;i++)
+        {
+            mat4 model = GLM_MAT4_IDENTITY_INIT;
+            glm_translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            if (i % 3 == 0)
+            {
+                angle = glfwGetTime() * 25.0f;
+            }
+
+            glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+            
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
